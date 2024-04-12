@@ -85,7 +85,7 @@ def get_grid_cv_scores(model,params,custom_score,X_train,y_train):
 
 
 
-def plot_metric_results(results):
+def plot_metric_results(results,show_params=True):
     """Plot mean scores obtained for the following metrics from the GridSearchCV results :
     fit time, AUC, Accuracy, F1-score, custom score
 
@@ -116,5 +116,8 @@ def plot_metric_results(results):
     sns.lineplot(x=idx,y=results['mean_test_Custom_scorer'],ax=axs[2][0],label='mean_test_Custom_scorer')
     axs[2][0].tick_params('x', labelrotation=90)
 
+    if show_params :
+        results['settings']=idx
+        axs[2][1].table(cellText=results[['settings','params']].values, loc='center')
     axs[2][1].axis('off')
     plt.show()

@@ -1,7 +1,9 @@
 import glob
 import os
 import sys
+import tempfile
 
+import boto3
 import joblib
 import pandas as pd
 from imblearn.over_sampling import SMOTE
@@ -25,6 +27,27 @@ kaggle_df,X_train,X_test,y_train,y_test=get_initial_splits(df)
 scaler=StandardScaler()
 X_train_scaled=scaler.fit_transform(X_train)
 
+#Filter only selected features
+features_to_keep=['NAME_INCOME_TYPE_Working',
+ 'HOUSETYPE_MODE_block of flats',
+ 'NAME_EDUCATION_TYPE_Higher education',
+ 'FLAG_OWN_CAR',
+ 'CNT_CHILDREN',
+ 'WALLSMATERIAL_MODE_Stone, brick',
+ 'REGION_RATING_CLIENT_W_CITY',
+ 'DAYS_REGISTRATION',
+ 'FLAG_PHONE',
+ 'REGION_RATING_CLIENT',
+ 'REGION_POPULATION_RELATIVE',
+ 'NAME_EDUCATION_TYPE_Secondary / secondary special',
+ 'NAME_INCOME_TYPE_Commercial associate',
+ 'NAME_INCOME_TYPE_Pensioner',
+ 'NAME_TYPE_SUITE_Unaccompanied',
+ 'WEEKDAY_APPR_PROCESS_START_TUESDAY',
+ 'REG_CITY_NOT_WORK_CITY']
+X_train_scaled=X_train_scaled[features_to_keep]
+
+
 from sklearn.ensemble import RandomForestClassifier
 
 model=RandomForestClassifier(max_depth=5, max_features='log2', min_samples_leaf=10,n_estimators=10, random_state=33)
@@ -37,5 +60,16 @@ pipeline = Pipeline([
 
 pipeline.fit(X_train, y_train)
 
+#Save local copy of the fitted model and scaler
 joblib.dump(pipeline,"output/model.pkl")
 joblib.dump(scaler,"output/scaler.pkl")
+
+
+#Save a copy in AWS bucket
+s3_client = boto3.client('s3')
+
+output_file = 'model.pkl'
+s3_client.upload_file("output/model.pkl", "modelandscaler",'model.pkl')
+
+output_file = 'scaler.pkl'
+s3_client.upload_file("output/scaler.pkl", "modelandscaler",'scaler.pkl')

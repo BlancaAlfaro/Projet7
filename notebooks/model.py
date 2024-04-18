@@ -48,7 +48,7 @@ features_to_keep=['NAME_INCOME_TYPE_Working',
 X_train_scaled=X_train_scaled[features_to_keep]
 
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier  # TODO replace with best model
 
 model=RandomForestClassifier(max_depth=5, max_features='log2', min_samples_leaf=10,n_estimators=10, random_state=33)
 

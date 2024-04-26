@@ -1,7 +1,7 @@
 import io
 import os
 
-#import boto3
+import boto3
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np

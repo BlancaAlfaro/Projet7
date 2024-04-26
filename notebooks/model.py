@@ -1,15 +1,14 @@
 import glob
 import os
 import sys
-import tempfile
 
 import boto3
 import joblib
 import pandas as pd
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
-from sklearn.metrics import confusion_matrix, make_scorer
 from sklearn.preprocessing import StandardScaler
+from xgboost import XGBClassifier
 
 sys.path.append(os.path.abspath(os.path.join('..')))
 
@@ -24,10 +23,7 @@ for f in files:
 #Load data and split into train/test
 df=main(data_folder='data/')
 kaggle_df,X_train,X_test,y_train,y_test=get_initial_splits(df)
-scaler=StandardScaler()
-X_train_scaled=scaler.fit_transform(X_train)
-
-#Filter only selected features
+#Filter features to keep
 features_to_keep=['NAME_INCOME_TYPE_Working',
  'HOUSETYPE_MODE_block of flats',
  'NAME_EDUCATION_TYPE_Higher education',
@@ -45,25 +41,32 @@ features_to_keep=['NAME_INCOME_TYPE_Working',
  'NAME_TYPE_SUITE_Unaccompanied',
  'WEEKDAY_APPR_PROCESS_START_TUESDAY',
  'REG_CITY_NOT_WORK_CITY']
-X_train_scaled=X_train_scaled[features_to_keep]
-
-
-from sklearn.ensemble import RandomForestClassifier  # TODO replace with best model
-
-model=RandomForestClassifier(max_depth=5, max_features='log2', min_samples_leaf=10,n_estimators=10, random_state=33)
-
+X_train=X_train[features_to_keep]
+#Scale data
+scaler=StandardScaler()
+X_train_scaled=pd.DataFrame(scaler.fit_transform(X_train))
+X_train_scaled.columns=X_train.columns
+#Select model
+model=XGBClassifier(reg_alpha=0.001,
+                    colsample_bytree=0.3,
+                    gamma=0.5,
+                    reg_lambda= 0.001,
+                    learning_rate=0.01,
+                    max_depth= 4,
+                    n_estimators=40,
+                    subsample=0.7,
+                    random_state=33)
 #Fit model
 pipeline = Pipeline([
         ('sampling', SMOTE()),
         ('classification', model)
     ])
 
-pipeline.fit(X_train, y_train)
+pipeline.fit(X_train_scaled, y_train)
 
 #Save local copy of the fitted model and scaler
 joblib.dump(pipeline,"output/model.pkl")
 joblib.dump(scaler,"output/scaler.pkl")
-
 
 #Save a copy in AWS bucket
 s3_client = boto3.client('s3')

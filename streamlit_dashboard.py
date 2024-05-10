@@ -9,13 +9,7 @@ import requests
 import streamlit as st
 from PIL import Image
 
-
-def is_float(string):
-    try:
-        float(string)
-        return True
-    except ValueError:
-        return False
+from src.app_utils import is_float
 
 #api_url="http://127.0.0.1:8000/" #Local for testing
 api_url="https://ocp7webapp.azurewebsites.net/"
@@ -94,7 +88,7 @@ if selection=='Client raw data':
             prediction=prediction.json()
             print(prediction)
             st.write('Predicted class: '+prediction['prediction'])
-            st.write('Probability of not reimbursing :'+prediction['probability_of_not_reinbursing'])
+            st.write('Probability of reimbursing :'+prediction['probability_of_reinbursing'])
             # Add image from AWS
             filename="explain_prediction_for_"+"temp"
             s3_client = boto3.client('s3')
@@ -113,7 +107,7 @@ elif selection=='Client Id':
         prediction=requests.post(api_url+'model/predict_from_SK_ID_CURR?SK_ID_CURR='+str(input)).json()
         print(prediction)
         st.write('Predicted class: '+prediction['prediction'])
-        st.write('Probability of not reimbursing :'+prediction['probability_of_not_reinbursing'])
+        st.write('Probability of reimbursing :'+prediction['probability_of_reinbursing'])
         # Add image from AWS
         filename="explain_prediction_for_"+str(input)
         s3_client = boto3.client('s3')

@@ -8,6 +8,9 @@ import requests
 import streamlit as st
 from PIL import Image
 
+#api_url="http://127.0.0.1:8000/" #Local for testing
+api_url="https://ocp7webapp.azurewebsites.net/"
+
 st.title('Loan reimbursment prediction')
 selection=st.selectbox('Do you want to predict reimbursment probability from id or raw data?',('Client Id',"Client raw data"))
 if selection=='Client raw data':
@@ -41,32 +44,48 @@ if selection=='Client raw data':
     region_rating_client=st.text_input('Our rating of the region where client lives (1,2,3)')
     region_rating_client_w_city=st.text_input("Our rating of the region where client lives with taking city into account (1,2,3)")
     region_population=st.text_input("Normalized population of region where client lives (higher number means the client lives in more populated region)")
-    #TODO Trasform inputs into usable features
 
-    features_to_keep=['NAME_INCOME_TYPE_Working',
-    'HOUSETYPE_MODE_block of flats',
-    'NAME_EDUCATION_TYPE_Higher education',
-    'FLAG_OWN_CAR',
-    'CNT_CHILDREN',
-    'WALLSMATERIAL_MODE_Stone, brick',
-    'REGION_RATING_CLIENT_W_CITY',
-    'DAYS_REGISTRATION',
-    'FLAG_PHONE',
-    'REGION_RATING_CLIENT',
-    'REGION_POPULATION_RELATIVE',
-    'NAME_EDUCATION_TYPE_Secondary / secondary special',
-    'NAME_INCOME_TYPE_Commercial associate',
-    'NAME_INCOME_TYPE_Pensioner',
-    'NAME_TYPE_SUITE_Unaccompanied',
-    'WEEKDAY_APPR_PROCESS_START_TUESDAY',
-    'REG_CITY_NOT_WORK_CITY']
-    X=pd.DataFrame(columns=features_to_keep)
+    # Transform answers into usable features
+    features={}
+    str_to_bool_dict={'Yes' : True, 'No': False}
+
+    features['FLAG_PHONE']= str_to_bool_dict[flag_phone]
+    features['DAYS_REGISTRATION']=int(days_registration)
+    features['WEEKDAY_APPR_PROCESS_START_TUESDAY']=str_to_bool_dict[weekday_appr_process_start_tuesday]
+    features['NAME_INCOME_TYPE_Working']=(name_income=='Working')
+    features['NAME_INCOME_TYPE_Commercial associate']=(name_income=='Commercial associate')
+    features['NAME_INCOME_TYPE_Pensioner']=(name_income=='Pensioner')
+    features['FLAG_OWN_CAR']=str_to_bool_dict[flag_onw_car]
+    features['HOUSETYPE_MODE_block of flats']=str_to_bool_dict[housetype_mode]
+    features['WALLSMATERIAL_MODE_Stone, brick']=str_to_bool_dict[walls_material_type]
+    features['REG_CITY_NOT_WORK_CITY']=str_to_bool_dict[reg_city_not_work_city]
+    features['CNT_CHILDREN']=int(cnt_children)
+    features['NAME_TYPE_SUITE_Unaccompanied']=str_to_bool_dict[name_type_suite]
+    features['NAME_EDUCATION_TYPE_Higher education']=(name_education_type=='Higher education')
+    features['NAME_EDUCATION_TYPE_Secondary / secondary special']=(name_education_type=='Secondary / secondary special')
+    features['REGION_RATING_CLIENT']=int(region_rating_client)
+    features['REGION_RATING_CLIENT_W_CITY']=int(region_rating_client_w_city)
+    features['REGION_POPULATION_RELATIVE']=int(region_population)
+
+    X=pd.DataFrame(features,index=['temp'])
+    try :
+        st.write(X)
+    except ValueError:
+        st.write('Please provide the information needed for prediction')
+
+    try:
+        prediction=requests.post(api_url+'model/predict_from_data?',data=features)
+        st.write('Predicted class: '+prediction['prediction'])
+        st.write('Probability of not reimbursing :'+prediction['probability_of_not_reinbursing'])
+    except JSONDecodeError:
+        st.write('Please provide valid information for the prediction')
+
 elif selection=='Client Id':
     st.write('**Please input client id:**')
     input=st.text_input('SK_ID_CURR',help="Client id as found under SK_ID_CURR in client's data. Should be 6 digits long.")
     #Make a prediction request to the API
     try:
-        prediction=requests.post('http://127.0.0.1:8000/model/predict_from_SK_ID_CURR?SK_ID_CURR='+str(input)).json()
+        prediction=requests.post(api_url+'model/predict_from_SK_ID_CURR?SK_ID_CURR='+str(input)).json()
         st.write('Predicted class: '+prediction['prediction'])
         st.write('Probability of not reimbursing :'+prediction['probability_of_not_reinbursing'])
         # Add image from AWS

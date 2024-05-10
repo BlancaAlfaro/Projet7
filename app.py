@@ -61,7 +61,7 @@ def get_data_for_client(SK_ID_CURR):
 
 def explain_prediction(X_scaled,pipeline):
     explainer = shap.Explainer(pipeline['classification'])
-    shap.waterfall_plot(explainer(X_scaled)[0],show=False)#TODO Fix the fact that the image fx doesnt correspond to proba[0][0]
+    shap.waterfall_plot(explainer(X_scaled)[0],show=False)
     fig=plt.gcf()
     #Transform to uploadable image
     img = io.BytesIO()
@@ -99,11 +99,11 @@ def make_prediction_from_data(X,threshold):
     X_scaled.index=X.index
     proba=pipeline.predict_proba(X_scaled)
     print('proba',proba)
-    prediction=proba[0][0]<threshold
+    prediction=proba[0][0]>threshold #class 0 : reinbursing / class 1 : not reimbursing
     print(prediction)
     str_prediction_dict={True: 'Good chance of reimbursing', False : 'Low chance of reimbursing'}
     #Put image of shap waterfall to AWS
     explain_prediction(X_scaled,pipeline)
     #Return output
-    output={'prediction':str_prediction_dict[prediction],'probability_of_not_reinbursing':str(np.round(proba[0][0],2))}
+    output={'prediction':str_prediction_dict[prediction],'probability_of_reinbursing':str(np.round(proba[0][0],2))}
     return output

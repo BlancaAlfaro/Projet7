@@ -54,7 +54,6 @@ jobs:
 
       - name: Test with unittest
         run: |
-          pip install unittest
           unittest tests/tests.py
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 

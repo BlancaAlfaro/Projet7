@@ -21,7 +21,7 @@ s3_client = boto3.client('s3')
 s3_client.download_file("modelandscaler",'model.pkl',"output/model.pkl")
 s3_client.download_file("modelandscaler","scaler.pkl", "output/scaler.pkl")
 
-#load downloaded local files
+#Load downloaded local files
 pipeline=joblib.load("output/model.pkl")
 scaler=joblib.load("output/scaler.pkl")
 
@@ -32,7 +32,7 @@ class ClientData(BaseModel):
     data : dict
 
 @app.post('/model/predict_from_data')
-def predict_class(X :ClientData):#TODO : modify so that X is a json in dict shape
+def predict_class(X :ClientData):
     X=pd.DataFrame(X.data,index=['temp'])
     output=make_prediction_from_data(X,threshold=0.55)
     return output
@@ -51,6 +51,18 @@ def predict_class_from_id(SK_ID_CURR):
     return output
 
 def get_data_for_client(SK_ID_CURR):
+    """Loads clients data from csv file and returns data for a given client.
+
+    Parameters
+    ----------
+    SK_ID_CURR : str or int
+        id of the client
+
+    Returns
+    -------
+    pd.DataFrame
+        Data for the given client to be used to make predictions.
+    """
     if isinstance(SK_ID_CURR,str):
         SK_ID_CURR=int(SK_ID_CURR)
     data=pd.read_csv('output/X_test.csv',index_col=0)
@@ -60,6 +72,15 @@ def get_data_for_client(SK_ID_CURR):
 
 
 def explain_prediction(X_scaled,pipeline):
+    """Generate shap plot to explain prediction for given value and put image of the plot to AWS.
+
+    Parameters
+    ----------
+    X_scaled : pd.DataFrame
+        Data for which the prediction is made
+    pipeline : sklearn pipeline or equivalent
+        fitted pipeline to make predictions with.
+    """
     explainer = shap.Explainer(pipeline['classification'])
     shap.waterfall_plot(explainer(X_scaled)[0],show=False)
     fig=plt.gcf()
@@ -76,6 +97,20 @@ def explain_prediction(X_scaled,pipeline):
     bucket.put_object(Body=image, ContentType='image/png',Key='explain_prediction_for_'+str(X_scaled.index.values[0]))
 
 def make_prediction_from_data(X,threshold):
+    """Compute loan reinbursment prediction from client data
+
+    Parameters
+    ----------
+    X : pd.DataFrame
+        client data
+    threshold : float
+        threshold to apply to reinbursment probability to determine if the load should be given or not.
+
+    Returns
+    -------
+    dict
+        Dictionnay containing the predicted probability and class.
+    """
     features_to_keep=['NAME_INCOME_TYPE_Working',
     'HOUSETYPE_MODE_block of flats',
     'NAME_EDUCATION_TYPE_Higher education',

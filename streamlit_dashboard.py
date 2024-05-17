@@ -1,9 +1,6 @@
-import io
-import json
 from json import JSONDecodeError
 
 import boto3
-import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
@@ -15,6 +12,7 @@ from src.app_utils import is_float
 api_url="https://ocp7webapp.azurewebsites.net/"
 
 st.title('Loan reimbursment prediction')
+
 selection=st.selectbox('Do you want to predict reimbursment probability from id or raw data?',('Client Id',"Client raw data"))
 if selection=='Client raw data':
     st.write('This option is not available for now')

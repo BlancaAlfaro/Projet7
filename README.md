@@ -33,3 +33,6 @@ To generate requirements.txt :
 ```bash
 poetry export --without-hashes -f requirements.txt --output requirements.txt
 ```
+
+## Deployment
+[azure-webapps-python.yml](.github/workflows/azure-webapps-python.yml) runs deployments of the [app.py](app.py) script on an Azure WebApp checkable at [https://ocp7webapp.azurewebsites.net/docs#/](https://ocp7webapp.azurewebsites.net/docs#/). Build includes app unit tests defined in [tests.py](tests/tests.py)

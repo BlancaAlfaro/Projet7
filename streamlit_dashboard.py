@@ -15,7 +15,7 @@ st.title('Loan reimbursment prediction')
 
 selection=st.selectbox('Do you want to predict reimbursment probability from id or raw data?',('Client Id',"Client raw data"))
 if selection=='Client raw data':
-    st.write('This option is not available for now')
+
     #Add fields to input needed features
     st.subheader('**Please provide the following information:**')
 

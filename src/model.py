@@ -47,15 +47,16 @@ scaler=StandardScaler()
 X_train_scaled=pd.DataFrame(scaler.fit_transform(X_train))
 X_train_scaled.columns=X_train.columns
 #Select model
-model=XGBClassifier(reg_alpha=0.001,
+model=XGBClassifier(reg_alpha=0.007,
                     colsample_bytree=0.3,
                     gamma=0.5,
-                    reg_lambda= 0.001,
+                    reg_lambda= 0.005,
                     learning_rate=0.01,
                     max_depth= 4,
-                    n_estimators=40,
+                    n_estimators=150,
                     subsample=0.7,
                     random_state=33)
+
 #Fit model
 pipeline = Pipeline([
         ('sampling', SMOTE()),

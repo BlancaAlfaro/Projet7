@@ -73,7 +73,7 @@ def get_data_for_client(SK_ID_CURR):
     return X
 
 
-def explain_prediction(X_scaled,pipeline):
+def explain_prediction(X_scaled,pipeline,X=None):
     """Generate shap plot to explain prediction for given value and put image of the plot to AWS.
 
     Parameters
@@ -82,6 +82,8 @@ def explain_prediction(X_scaled,pipeline):
         Data for which the prediction is made
     pipeline : sklearn pipeline or equivalent
         fitted pipeline to make predictions with.
+    X : pd.DataFrame
+        unscaled data for lr explainer
     """
     if isinstance(pipeline['classification'],LogisticRegression):
         explainer=shap.LinearExplainer(pipeline['classification'],X)
@@ -143,7 +145,7 @@ def make_prediction_from_data(X,threshold):
     print(prediction)
     str_prediction_dict={True: 'Good chance of reimbursing', False : 'Low chance of reimbursing'}
     #Put image of shap waterfall to AWS
-    explain_prediction(X_scaled,pipeline)
+    explain_prediction(X_scaled,pipeline,X)
     #Return output
     output={'prediction':str_prediction_dict[prediction],'probability_of_reinbursing':str(np.round(proba[0][0],2))}
     return output

@@ -10,6 +10,7 @@ import pandas as pd
 import shap
 from fastapi import FastAPI
 from pydantic import BaseModel
+from sklearn.linear_model import LogisticRegression
 
 #Run `uvicorn app:app --reload` in a terminal to test
 
@@ -27,6 +28,7 @@ scaler=joblib.load("output/scaler.pkl")
 
 #Download client data (here X_test is used) from AWS
 s3_client.download_file("clientsdataxtest",'X_test.csv',"output/X_test.csv")
+X_test=pd.read_csv('output/X_test.csv',index_col=0)
 
 class ClientData(BaseModel):
     data : dict
@@ -47,7 +49,7 @@ def load_data_for_client(SK_ID_CURR):
 def predict_class_from_id(SK_ID_CURR):
     X=get_data_for_client(SK_ID_CURR)
     X=X.set_index('SK_ID_CURR')
-    output=make_prediction_from_data(X,threshold=0.55)
+    output=make_prediction_from_data(X,threshold=0.65)
     return output
 
 def get_data_for_client(SK_ID_CURR):
@@ -81,7 +83,10 @@ def explain_prediction(X_scaled,pipeline):
     pipeline : sklearn pipeline or equivalent
         fitted pipeline to make predictions with.
     """
-    explainer = shap.Explainer(pipeline['classification'])
+    if isinstance(pipeline['classification'],LogisticRegression):
+        explainer=shap.LinearExplainer(pipeline['classification'],X)
+    else :
+        explainer = shap.Explainer(pipeline['classification'])
     shap.waterfall_plot(explainer(X_scaled)[0],show=False)
     fig=plt.gcf()
     #Transform to uploadable image

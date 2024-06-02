@@ -7,8 +7,8 @@ import joblib
 import pandas as pd
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
-from xgboost import XGBClassifier
 
 sys.path.append(os.path.abspath(os.path.join('..')))
 
@@ -47,15 +47,7 @@ scaler=StandardScaler()
 X_train_scaled=pd.DataFrame(scaler.fit_transform(X_train))
 X_train_scaled.columns=X_train.columns
 #Select model
-model=XGBClassifier(reg_alpha=0.007,
-                    colsample_bytree=0.3,
-                    gamma=0.5,
-                    reg_lambda= 0.005,
-                    learning_rate=0.01,
-                    max_depth= 4,
-                    n_estimators=150,
-                    subsample=0.7,
-                    random_state=33)
+model=LogisticRegression(penalty=None, random_state=33)
 
 #Fit model
 pipeline = Pipeline([

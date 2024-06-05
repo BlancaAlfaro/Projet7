@@ -15,7 +15,10 @@ class TestAPI(unittest.TestCase):
 
     def test_predict_from_SK_ID_CURR(self):
         #Retrieve prediction
-        prediction=requests.post(self.api_url+'model/predict_from_SK_ID_CURR?SK_ID_CURR='+str(self.skid)).json()
+        prediction=requests.post(self.api_url+'model/predict_from_SK_ID_CURR?SK_ID_CURR='+str(self.skid))
+        self.assertEqual(str(prediction),'<Response [200]>')
+        #Convert to json
+        prediction=prediction.json()
         #Check contents
         self.assertIsInstance(prediction,dict)
         self.assertEqual(list(prediction.keys()),['prediction', 'probability_of_reinbursing'])

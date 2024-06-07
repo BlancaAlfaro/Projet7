@@ -145,7 +145,7 @@ def make_prediction_from_data(X,threshold):
     print(prediction)
     str_prediction_dict={True: 'Good chance of reimbursing', False : 'Low chance of reimbursing'}
     #Put image of shap waterfall to AWS
-    explain_prediction(X_scaled,pipeline,X)
+    #explain_prediction(X_scaled,pipeline,X)
     #Return output
     output={'prediction':str_prediction_dict[prediction],'probability_of_reinbursing':str(np.round(proba[0][0],2))}
     return output

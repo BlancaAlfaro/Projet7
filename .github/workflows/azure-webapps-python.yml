@@ -52,6 +52,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Deploy to AWS
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       - name: Test with unittest
         run: python -m unittest tests/tests.py

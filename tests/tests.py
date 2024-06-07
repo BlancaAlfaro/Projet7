@@ -11,7 +11,7 @@ class TestAPI(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
         self.skid=404989
-        self.api_url="https://ocp7webapp.azurewebsites.net/"
+        self.api_url="https://ocp7webapp.azurewebsites.net/" #"https://oc7.azurewebsites.net/"
 
     def test_predict_from_SK_ID_CURR(self):
         #Retrieve prediction

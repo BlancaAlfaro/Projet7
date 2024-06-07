@@ -7,8 +7,8 @@ from fastapi.testclient import TestClient
 from app import app
 from src.app_utils import build_test_features, is_float
 
+#To run locally : run `python -m unittest tests/tests.py` in the terminal
 
-#To run locally run `python -m unittest tests/tests.py` in the terminal
 class TestAPI(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)

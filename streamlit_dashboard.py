@@ -9,7 +9,7 @@ from PIL import Image
 from src.app_utils import is_float
 
 #api_url="http://127.0.0.1:8000/" #Local for testing
-api_url="https://ocp7webapp.azurewebsites.net/"
+api_url="https://oc7.azurewebsites.net/"
 
 st.title('Loan reimbursment prediction')
 
